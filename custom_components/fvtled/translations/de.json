@@ -1,0 +1,27 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "FVTLED-Gerät auswählen",
+        "description": "Wähle das FVTLED-BLE-Gerät aus, das du steuern möchtest.",
+        "data": {
+          "device": "Gerät"
+        }
+      },
+      "confirm": {
+        "title": "FVTLED-Gerät bestätigen",
+        "description": "Möchtest du das FVTLED-Gerät **{name}** hinzufügen?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Stelle sicher, dass es eingeschaltet und in Bluetooth-Reichweite ist.",
+      "unknown": "Unerwarteter Fehler. Bitte überprüfe die Home Assistant-Protokolle."
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert.",
+      "no_devices_found": "Es wurden keine FVTLED-BLE-Geräte gefunden. Stelle sicher, dass das Gerät eingeschaltet und in Bluetooth-Reichweite ist.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten."
+    }
+  }
+}
