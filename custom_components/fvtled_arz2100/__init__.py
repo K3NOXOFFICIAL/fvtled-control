@@ -7,11 +7,11 @@ the Zengge/MagicHome protocol with a newer 28-byte status response.
 import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_HOST, Platform
+from homeassistant.const import Platform
+
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
-DOMAIN = "fvtled_arz2100"
 PLATFORMS = [Platform.LIGHT]
 
 

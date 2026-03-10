@@ -49,6 +49,7 @@ class FVTLEDARZ2100Light(LightEntity):
         self._attr_is_on = False
         self._attr_brightness = 255
         self._attr_rgbw_color = (255, 255, 255, 0)
+        self._attr_available = True
 
         # Device info
         self._attr_device_info = {
@@ -58,11 +59,6 @@ class FVTLEDARZ2100Light(LightEntity):
             "model": DEVICE_MODEL,
             "sw_version": "Firmware WF.52 (ZG-BL-3KEY)",
         }
-
-    @property
-    def available(self) -> bool:
-        """Return if the device is available."""
-        return True
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the light."""
@@ -107,6 +103,7 @@ class FVTLEDARZ2100Light(LightEntity):
         """Fetch new state data for the light."""
         status = await self._protocol.async_get_status()
         if status:
+            self._attr_available = True
             self._attr_is_on = status["power"]
             self._attr_brightness = status["brightness"]
             self._attr_rgbw_color = (
@@ -122,4 +119,5 @@ class FVTLEDARZ2100Light(LightEntity):
                 self._attr_rgbw_color,
             )
         else:
+            self._attr_available = False
             _LOGGER.warning("Failed to update device status")
