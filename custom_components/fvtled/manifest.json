@@ -1,0 +1,20 @@
+{
+  "domain": "fvtled",
+  "name": "FVTLED",
+  "version": "0.1.0",
+  "codeowners": ["@K3NOXOFFICIAL"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/K3NOXOFFICIAL/fvtled-control",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "requirements": ["bleak==0.22.3"],
+  "bluetooth": [
+    {
+      "service_uuid": "0000ffff-0000-1000-8000-00805f9b34fb"
+    },
+    {
+      "service_uuid": "00005a01-0000-1000-8000-00805f9b34fb"
+    }
+  ]
+}
