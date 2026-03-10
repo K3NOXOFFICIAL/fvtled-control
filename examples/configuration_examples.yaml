@@ -1,0 +1,229 @@
+# Example Home Assistant Configuration
+
+## Basic Light Control
+
+```yaml
+# Example configuration.yaml
+# Note: With the custom integration, you don't need to add anything to configuration.yaml
+# The integration is configured through the UI
+
+# However, you can still use the device in automations, scripts, etc.
+```
+
+## Automations
+
+### Turn on at Sunset
+```yaml
+automation:
+  - alias: "LED Strip an bei Sonnenuntergang"
+    description: "Schaltet den LED-Streifen bei Sonnenuntergang ein"
+    trigger:
+      - platform: sun
+        event: sunset
+        offset: "-00:30:00"  # 30 Minuten vor Sonnenuntergang
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.fvtled_arz_2100
+        data:
+          brightness: 180
+          rgbw_color: [255, 200, 100, 0]  # Warmes Orange
+```
+
+### Turn off at Night
+```yaml
+automation:
+  - alias: "LED Strip aus in der Nacht"
+    description: "Schaltet den LED-Streifen um Mitternacht aus"
+    trigger:
+      - platform: time
+        at: "00:00:00"
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: light.fvtled_arz_2100
+```
+
+### Motion Activated
+```yaml
+automation:
+  - alias: "LED Strip bei Bewegung"
+    description: "Schaltet LED-Streifen bei Bewegungserkennung ein"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.motion_sensor
+        to: "on"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.fvtled_arz_2100
+        data:
+          brightness: 255
+          rgbw_color: [255, 255, 255, 0]  # Weißes Licht
+```
+
+## Scripts
+
+### Party Mode
+```yaml
+script:
+  party_mode:
+    alias: "Party Modus"
+    sequence:
+      - repeat:
+          count: 10
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.fvtled_arz_2100
+              data:
+                brightness: 255
+                rgbw_color: [255, 0, 0, 0]  # Rot
+            - delay: "00:00:01"
+            - service: light.turn_on
+              target:
+                entity_id: light.fvtled_arz_2100
+              data:
+                brightness: 255
+                rgbw_color: [0, 255, 0, 0]  # Grün
+            - delay: "00:00:01"
+            - service: light.turn_on
+              target:
+                entity_id: light.fvtled_arz_2100
+              data:
+                brightness: 255
+                rgbw_color: [0, 0, 255, 0]  # Blau
+            - delay: "00:00:01"
+```
+
+### Romantic Mode
+```yaml
+script:
+  romantic_mode:
+    alias: "Romantik Modus"
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.fvtled_arz_2100
+        data:
+          brightness: 100
+          rgbw_color: [255, 50, 100, 0]  # Sanftes Rosa
+```
+
+### Reading Mode
+```yaml
+script:
+  reading_mode:
+    alias: "Lese Modus"
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.fvtled_arz_2100
+        data:
+          brightness: 200
+          rgbw_color: [0, 0, 0, 255]  # Warmweißes Licht
+```
+
+## Lovelace Dashboard Card
+
+```yaml
+type: light
+entity: light.fvtled_arz_2100
+name: FVTLED RGB Controller
+icon: mdi:led-strip-variant
+```
+
+### Advanced Card with Shortcuts
+```yaml
+type: vertical-stack
+cards:
+  - type: light
+    entity: light.fvtled_arz_2100
+    name: FVTLED RGB Controller
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: Party
+        icon: mdi:party-popper
+        tap_action:
+          action: call-service
+          service: script.party_mode
+      - type: button
+        name: Romantik
+        icon: mdi:heart
+        tap_action:
+          action: call-service
+          service: script.romantic_mode
+      - type: button
+        name: Lesen
+        icon: mdi:book-open-variant
+        tap_action:
+          action: call-service
+          service: script.reading_mode
+```
+
+## Node-RED Flow Example
+
+For those using Node-RED, here's an example flow:
+
+```json
+[
+  {
+    "id": "inject_sunset",
+    "type": "inject",
+    "name": "Sunset",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 100,
+    "y": 100,
+    "wires": [["call_service"]]
+  },
+  {
+    "id": "call_service",
+    "type": "api-call-service",
+    "name": "Turn On LED",
+    "server": "home_assistant",
+    "service_domain": "light",
+    "service": "turn_on",
+    "data": "{\"entity_id\":\"light.fvtled_arz_2100\",\"brightness\":200,\"rgbw_color\":[255,200,100,0]}",
+    "x": 300,
+    "y": 100,
+    "wires": []
+  }
+]
+```
+
+## Color Presets
+
+Here are some useful RGBW color combinations:
+
+```yaml
+# Pure Colors
+red:        [255, 0, 0, 0]
+green:      [0, 255, 0, 0]
+blue:       [0, 0, 255, 0]
+white:      [0, 0, 0, 255]
+
+# Mixed Colors
+yellow:     [255, 255, 0, 0]
+cyan:       [0, 255, 255, 0]
+magenta:    [255, 0, 255, 0]
+orange:     [255, 165, 0, 0]
+purple:     [128, 0, 128, 0]
+pink:       [255, 192, 203, 0]
+
+# Whites
+warm_white: [0, 0, 0, 255]
+cool_white: [200, 200, 255, 100]
+daylight:   [255, 255, 255, 50]
+
+# Special
+sunset:     [255, 100, 50, 0]
+ocean:      [0, 105, 148, 0]
+forest:     [34, 139, 34, 0]
+fire:       [255, 69, 0, 0]
+```
