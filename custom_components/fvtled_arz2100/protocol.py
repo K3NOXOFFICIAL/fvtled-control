@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import socket
+import time
 from typing import Optional, Tuple
 
 from .const import (
@@ -26,6 +27,8 @@ class FVTLEDARZ2100Protocol:
         self.port = port
         self._socket: Optional[socket.socket] = None
         self._lock = asyncio.Lock()
+        self._max_retries = 3
+        self._retry_delay = 0.5
 
     def _calculate_checksum(self, data: bytes) -> int:
         """Calculate checksum for command packet."""
@@ -38,7 +41,7 @@ class FVTLEDARZ2100Protocol:
                 self._socket.close()
 
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self._socket.settimeout(5.0)
+            self._socket.settimeout(10.0)  # Increased from 5.0 to 10.0 seconds
             self._socket.connect((self.host, self.port))
             _LOGGER.debug("Connected to %s:%s", self.host, self.port)
             return True
@@ -56,24 +59,42 @@ class FVTLEDARZ2100Protocol:
             self._socket = None
 
     def _send_command(self, command: bytes) -> Optional[bytes]:
-        """Send a command and read response."""
-        try:
-            if not self._connect():
-                return None
+        """Send a command and read response with retry logic."""
+        last_error = None
 
-            _LOGGER.debug("Sending command: %s", command.hex())
-            self._socket.send(command)
+        for attempt in range(self._max_retries):
+            try:
+                if not self._connect():
+                    if attempt < self._max_retries - 1:
+                        time.sleep(self._retry_delay)
+                        continue
+                    return None
 
-            # Read response
-            response = self._socket.recv(STATUS_RESPONSE_LENGTH)
-            _LOGGER.debug("Received response (%d bytes): %s", len(response), response.hex())
+                _LOGGER.debug("Sending command (attempt %d/%d): %s", attempt + 1, self._max_retries, command.hex())
+                self._socket.send(command)
 
-            return response
-        except (socket.error, OSError) as err:
-            _LOGGER.error("Error sending command: %s", err)
-            return None
-        finally:
-            self._disconnect()
+                # Read response
+                response = self._socket.recv(STATUS_RESPONSE_LENGTH)
+                _LOGGER.debug("Received response (%d bytes): %s", len(response), response.hex())
+
+                return response
+            except socket.timeout as err:
+                last_error = err
+                _LOGGER.warning("Command timeout (attempt %d/%d): %s", attempt + 1, self._max_retries, err)
+                if attempt < self._max_retries - 1:
+                    time.sleep(self._retry_delay)
+                    continue
+            except (socket.error, OSError) as err:
+                last_error = err
+                _LOGGER.warning("Error sending command (attempt %d/%d): %s", attempt + 1, self._max_retries, err)
+                if attempt < self._max_retries - 1:
+                    time.sleep(self._retry_delay)
+                    continue
+            finally:
+                self._disconnect()
+
+        _LOGGER.error("Error sending command after %d attempts: %s", self._max_retries, last_error)
+        return None
 
     async def async_send_command(self, command: bytes) -> Optional[bytes]:
         """Send command asynchronously."""
@@ -86,7 +107,8 @@ class FVTLEDARZ2100Protocol:
         command = bytes([CMD_QUERY_STATUS, 0x8A, 0x8B])
         response = await self.async_send_command(command)
 
-        if not response or len(response) < STATUS_RESPONSE_LENGTH:
+        # Accept both 27 and 28-byte responses (device variants differ)
+        if not response or len(response) < 27:
             _LOGGER.warning("Invalid status response length: %s", len(response) if response else 0)
             return None
 
@@ -95,7 +117,7 @@ class FVTLEDARZ2100Protocol:
             return None
 
         try:
-            # Parse the 28-byte response
+            # Parse the response (27 or 28 bytes)
             # Byte 0: Response header (0x81)
             # Byte 1: Device type
             # Byte 2: Power state (0x23 = on, 0x24 = off)
@@ -106,7 +128,7 @@ class FVTLEDARZ2100Protocol:
             # Byte 7: Blue value
             # Byte 8: White value
             # Bytes 9-26: Extended data
-            # Byte 27: Checksum
+            # Byte 27: Checksum (if present)
 
             return {
                 "power": response[2] == 0x23,

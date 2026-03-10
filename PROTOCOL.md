@@ -2,7 +2,7 @@
 
 ## Overview
 
-The FVTLED ARZ-2100 uses a variant of the Zengge/MagicHome protocol (Version 9) with firmware `WF.52.B6.26.0,V9_ZG-BL-3KEY`. The key difference from standard implementations is the **28-byte status response** instead of the typical 14 or 27 bytes.
+The FVTLED ARZ-2100 uses a variant of the Zengge/MagicHome protocol (Version 9) with firmware `WF.52.B6.26.0,V9_ZG-BL-3KEY`. Some devices return **27-byte status responses** while others may return 28 bytes, different from the standard 14-byte implementation.
 
 ## Connection Details
 
@@ -36,9 +36,9 @@ def calculate_checksum(data: bytes) -> int:
 81 8A 8B
 ```
 
-**Response (28 bytes):**
+**Response (27 or 28 bytes):**
 ```
-81 [device_type] [power] [mode] [speed] [R] [G] [B] [W] [ext...] [checksum]
+81 [device_type] [power] [mode] [speed] [R] [G] [B] [W] [ext...] [checksum (optional)]
 ```
 
 **Byte Breakdown:**
@@ -54,8 +54,10 @@ def calculate_checksum(data: bytes) -> int:
 | 6 | Green value | `0x00` - `0xFF` |
 | 7 | Blue value | `0x00` - `0xFF` |
 | 8 | White value | `0x00` - `0xFF` |
-| 9-26 | Extended data | Device-specific |
-| 27 | Checksum | Sum of bytes 0-26 & 0xFF |
+| 9-25/26 | Extended data | Device-specific |
+| 26/27 | Checksum (optional) | Sum of previous bytes & 0xFF |
+
+**Note:** Some device variants return 27 bytes, others return 28 bytes. The protocol accepts both.
 
 **Example Response (Device ON, Red Color):**
 ```
@@ -152,12 +154,12 @@ import socket
 def send_command(host, port, command):
     """Send command and receive response"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(5)
+    sock.settimeout(10)  # Increased timeout for reliability
 
     try:
         sock.connect((host, port))
         sock.send(bytes(command))
-        response = sock.recv(28)
+        response = sock.recv(28)  # Read up to 28 bytes (device may return 27 or 28)
         return response
     finally:
         sock.close()
@@ -169,6 +171,7 @@ port = 5577
 # Query status
 response = send_command(host, port, [0x81, 0x8A, 0x8B])
 print(f"Status: {response.hex()}")
+print(f"Response length: {len(response)} bytes")
 print(f"Power: {'ON' if response[2] == 0x23 else 'OFF'}")
 print(f"RGB: ({response[5]}, {response[6]}, {response[7]})")
 print(f"White: {response[8]}")
@@ -211,16 +214,12 @@ tcp.port == 5577
 81 [type] [power] [mode] [speed] [R] [G] [B] [W] ... (27 bytes total)
 ```
 
-### ARZ-2100 Protocol (28-byte response)
+### ARZ-2100 Protocol (27 or 28-byte response)
 ```
-81 [type] [power] [mode] [speed] [R] [G] [B] [W] ... (28 bytes total)
+81 [type] [power] [mode] [speed] [R] [G] [B] [W] ... (27 or 28 bytes total)
 ```
 
-**Key Issue:** Standard libraries expect responses up to 27 bytes (indices 0-26). The ARZ-2100 returns 28 bytes (indices 0-27), causing parsing errors:
-
-```
-RangeError (length): Invalid value: Not in inclusive range 0..26: 28
-```
+**Key Issue:** Standard libraries expect responses up to 14 or 27 bytes. The ARZ-2100 may return 27 or 28 bytes depending on the device variant. This implementation accepts both lengths.
 
 ## Firmware Information
 
@@ -276,15 +275,12 @@ except OSError:
 
 ```python
 def validate_response(response: bytes) -> bool:
-    """Validate 28-byte response"""
-    if len(response) != 28:
+    """Validate 27 or 28-byte response"""
+    if len(response) < 27:
         return False
     if response[0] != 0x81:  # Check header
         return False
-    # Validate checksum
-    expected = sum(response[0:27]) & 0xFF
-    if response[27] != expected:
-        return False
+    # Note: Checksum validation optional as some devices return 27 bytes without checksum
     return True
 ```
 

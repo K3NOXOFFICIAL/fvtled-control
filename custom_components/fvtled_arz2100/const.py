@@ -11,7 +11,7 @@ DEVICE_MANUFACTURER = "FVTLED"
 
 # Protocol constants
 PROTOCOL_VERSION = 9
-STATUS_RESPONSE_LENGTH = 28  # This device uses 28-byte status response
+STATUS_RESPONSE_LENGTH = 28  # Expected length (some devices return 27 bytes)
 
 # Command bytes
 CMD_POWER_ON = 0x71
