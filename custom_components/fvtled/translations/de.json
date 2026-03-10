@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "FVTLED BLE Controller einrichten",
+        "description": "{discovered} FVTLED-Gerät(e) in der Nähe gefunden. Wähle dein Gerät aus oder gib die Bluetooth-Adresse manuell ein.",
+        "data": {
+          "address": "Bluetooth-Adresse",
+          "name": "Name (optional)"
+        }
+      },
+      "bluetooth_confirm": {
+        "title": "FVTLED BLE Controller gefunden",
+        "description": "**{name}** ({address}) wurde gefunden. Möchtest du es einrichten?",
+        "data": {
+          "name": "Name (optional)"
+        }
+      }
+    },
+    "error": {
+      "device_not_found": "Gerät nicht gefunden. Stelle sicher, dass das Gerät eingeschaltet und in Bluetooth-Reichweite ist."
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert.",
+      "not_supported": "Gerät ist kein unterstützter FVTLED-Controller."
+    }
+  }
+}
