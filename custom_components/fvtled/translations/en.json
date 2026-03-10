@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up FVTLED ARZ-2100",
+        "description": "Select your FVTLED ARZ-2100 device or enter its Bluetooth address manually.",
+        "data": {
+          "address": "Bluetooth Address"
+        }
+      },
+      "confirm": {
+        "title": "Confirm FVTLED ARZ-2100",
+        "description": "Do you want to add **{name}** ({address}) to Home Assistant?"
+      }
+    },
+    "error": {
+      "no_devices_found": "No FVTLED devices were found nearby. Make sure the device is powered on and within range, then try again.",
+      "cannot_connect": "Unable to connect to the device. Please verify the Bluetooth address and try again."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "no_devices_found": "No FVTLED devices found."
+    }
+  }
+}

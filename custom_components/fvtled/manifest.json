@@ -1,0 +1,20 @@
+{
+  "domain": "fvtled",
+  "name": "FVTLED ARZ-2100 BLE",
+  "version": "1.0.0",
+  "documentation": "https://github.com/K3NOXOFFICIAL/fvtled-control",
+  "issue_tracker": "https://github.com/K3NOXOFFICIAL/fvtled-control/issues",
+  "dependencies": ["bluetooth"],
+  "codeowners": ["@K3NOXOFFICIAL"],
+  "requirements": ["bleak>=0.21.1", "bleak-retry-connector>=3.1.0"],
+  "bluetooth": [
+    {
+      "local_name": "ARZ*"
+    },
+    {
+      "local_name": "FVTLED*"
+    }
+  ],
+  "iot_class": "local_polling",
+  "config_flow": true
+}
