@@ -1,0 +1,26 @@
+{
+  "domain": "fvtled",
+  "name": "FVTLED BLE Controller",
+  "version": "1.0.0",
+  "documentation": "https://github.com/K3NOXOFFICIAL/fvtled-control",
+  "issue_tracker": "https://github.com/K3NOXOFFICIAL/fvtled-control/issues",
+  "dependencies": [],
+  "codeowners": ["@K3NOXOFFICIAL"],
+  "requirements": [],
+  "bluetooth": [
+    {
+      "service_uuid": "0000ffff-0000-1000-8000-00805f9b34fb",
+      "connectable": true
+    },
+    {
+      "service_uuid": "0000fe00-0000-1000-8000-00805f9b34fb",
+      "connectable": true
+    },
+    {
+      "service_uuid": "00005a01-0000-1000-8000-00805f9b34fb",
+      "connectable": true
+    }
+  ],
+  "config_flow": true,
+  "iot_class": "local_polling"
+}
