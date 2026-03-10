@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "FVTLED ARZ-2100 einrichten",
+        "description": "Geben Sie die IP-Adresse Ihres FVTLED ARZ-2100 RGB Controllers ein",
+        "data": {
+          "host": "IP-Adresse",
+          "name": "Gerätename"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert"
+    }
+  }
+}

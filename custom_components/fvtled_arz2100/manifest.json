@@ -1,0 +1,11 @@
+{
+  "domain": "fvtled_arz2100",
+  "name": "FVTLED ARZ-2100 RGB Controller",
+  "version": "1.0.0",
+  "documentation": "https://github.com/K3NOXOFFICIAL/fvtled-control",
+  "issue_tracker": "https://github.com/K3NOXOFFICIAL/fvtled-control/issues",
+  "requirements": [],
+  "codeowners": ["@K3NOXOFFICIAL"],
+  "config_flow": true,
+  "iot_class": "local_polling"
+}
